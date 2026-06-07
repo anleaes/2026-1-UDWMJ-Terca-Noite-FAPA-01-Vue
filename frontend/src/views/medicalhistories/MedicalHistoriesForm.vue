@@ -7,7 +7,7 @@ const router = useRouter()
 const route = useRoute()
 const id = route.params.id
 
-const form = ref({ allergies: '', family_history: '', notes: '' })
+const form = ref({ allergies: '', family_history: '', patient_name: '' })
 
 onMounted(async () => {
   if (id) {
@@ -46,8 +46,8 @@ async function save() {
           <textarea v-model="form.family_history" required></textarea>
         </div>
         <div class="form-group full">
-          <label>Notas</label>
-          <input type="text" v-model="form.notes" required />
+          <label>Nome do Paciente</label>
+          <input type="text" v-model="form.patient_name" required />
         </div>
       </div>
       <div class="form-actions">

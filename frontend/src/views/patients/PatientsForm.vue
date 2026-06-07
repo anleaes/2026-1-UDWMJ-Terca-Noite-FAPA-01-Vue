@@ -9,6 +9,7 @@ const id = route.params.id
 
 const form = ref({ name: '', cpf: '', birth_date: '', email: '', sex: '', emergency_contact: '', health_insurance: '', allergies: null })
 const histories = ref([])
+const historyForm = ref({ allergies: '', family_history: '' })
 
 onMounted(async () => {
   const res = await axios.get('http://localhost:8000/api/medicalhistories/')
@@ -23,7 +24,15 @@ async function save() {
   if (id) {
     await axios.put(`http://localhost:8000/api/patients/${id}/`, form.value)
   } else {
-    await axios.post('http://localhost:8000/api/patients/', form.value)
+    const historyRes = await axios.post('http://localhost:8000/api/medicalhistories/', {
+      patient_name: form.value.name,
+      allergies: historyForm.value.allergies,
+      family_history: historyForm.value.family_history,
+    })
+    await axios.post('http://localhost:8000/api/patients/', {
+      ...form.value,
+      allergies: historyRes.data.id,
+    })
   }
   router.push('/patients')
 }
@@ -76,13 +85,25 @@ async function save() {
           <label>Convênio</label>
           <input type="text" v-model="form.health_insurance" />
         </div>
-        <div class="form-group full">
-          <label>Histórico Médico (Alergias)</label>
-          <select v-model="form.allergies">
-            <option :value="null">---------</option>
-            <option v-for="h in histories" :key="h.id" :value="h.id">Histórico #{{ h.id }} — {{ h.notes }}</option>
-          </select>
-        </div>
+        <template v-if="id">
+          <div class="form-group full">
+            <label>Histórico Médico</label>
+            <select v-model="form.allergies">
+              <option :value="null">---------</option>
+              <option v-for="h in histories" :key="h.id" :value="h.id">{{ h.patient_name }}</option>
+            </select>
+          </div>
+        </template>
+        <template v-else>
+          <div class="form-group full">
+            <label>Alergias</label>
+            <textarea v-model="historyForm.allergies"></textarea>
+          </div>
+          <div class="form-group full">
+            <label>Histórico Familiar</label>
+            <textarea v-model="historyForm.family_history"></textarea>
+          </div>
+        </template>
       </div>
       <div class="form-actions">
         <RouterLink to="/patients" class="btn btn-ghost">Cancelar</RouterLink>
