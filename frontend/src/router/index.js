@@ -14,10 +14,12 @@ import DoctorsForm from '../views/doctors/DoctorsForm.vue'
 import DoctorsDetail from '../views/doctors/DoctorsDetail.vue'
 import ConsultsList from '../views/consults/ConsultsList.vue'
 import ConsultsForm from '../views/consults/ConsultsForm.vue'
+import ConsultsDetail from '../views/consults/ConsultsDetail.vue'
 import ExamsList from '../views/exams/ExamsList.vue'
 import ExamsForm from '../views/exams/ExamsForm.vue'
 import PrescriptionsList from '../views/prescriptions/PrescriptionsList.vue'
 import PrescriptionsForm from '../views/prescriptions/PrescriptionsForm.vue'
+import PrescriptionsDetail from '../views/prescriptions/PrescriptionsDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,6 +50,7 @@ const router = createRouter({
 
     { path: '/consults', component: ConsultsList },
     { path: '/consults/add', component: ConsultsForm },
+    { path: '/consults/:id', component: ConsultsDetail },
     { path: '/consults/:id/edit', component: ConsultsForm },
 
     { path: '/exams', component: ExamsList },
@@ -56,6 +59,7 @@ const router = createRouter({
 
     { path: '/prescriptions', component: PrescriptionsList },
     { path: '/prescriptions/add', component: PrescriptionsForm },
+    { path: '/prescriptions/:id', component: PrescriptionsDetail },
     { path: '/prescriptions/:id/edit', component: PrescriptionsForm },
   ],
 })

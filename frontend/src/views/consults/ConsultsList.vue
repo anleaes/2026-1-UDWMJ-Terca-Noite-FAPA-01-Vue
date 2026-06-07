@@ -39,8 +39,8 @@ function formatDate(dt) {
       <tbody>
         <tr v-for="c in consults" :key="c.id">
           <td class="td-mono">{{ c.id }}</td>
-          <td>{{ c.patient }}</td>
-          <td class="td-muted">{{ c.doctor }}</td>
+          <td><RouterLink :to="`/consults/${c.id}`">{{ c.patient_name }}</RouterLink></td>
+          <td class="td-muted">{{ c.doctor_name }}</td>
           <td class="td-muted">{{ formatDate(c.appointment_date) }}</td>
           <td><span class="badge badge-blue">{{ statusLabel[c.status] }}</span></td>
           <td>
