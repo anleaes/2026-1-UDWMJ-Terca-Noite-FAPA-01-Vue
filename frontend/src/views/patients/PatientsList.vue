@@ -33,7 +33,7 @@ async function remove(id) {
       </thead>
       <tbody>
         <tr v-for="p in patients" :key="p.id">
-          <td>{{ p.name }}</td>
+          <td><RouterLink :to="`/patients/${p.id}`">{{ p.name }}</RouterLink></td>
           <td class="td-mono">{{ p.cpf }}</td>
           <td class="td-muted">{{ p.health_insurance }}</td>
           <td class="td-muted">{{ p.emergency_contact }}</td>
