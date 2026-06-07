@@ -134,6 +134,7 @@ tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: var(--surface2); }
 td { padding: 14px 16px; font-size: 14px; }
 .td-muted { color: var(--text2); font-size: 13px; }
+tbody td a { color: inherit; text-decoration: underline; }
 .td-mono { font-family: var(--mono); font-size: 13px; color: var(--text2); }
 .actions { display: flex; gap: 6px; }
 .empty-row td { text-align: center; color: var(--text3); padding: 32px; }
