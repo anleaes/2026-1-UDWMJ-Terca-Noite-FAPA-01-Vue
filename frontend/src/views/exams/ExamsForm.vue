@@ -62,7 +62,7 @@ async function save() {
         </div>
       </div>
       <div class="form-actions">
-        <RouterLink to="/exams" class="btn btn-ghost">Cancelar</RouterLink>
+        <button type="button" class="btn btn-ghost" @click="router.back()">Cancelar</button>
         <button type="submit" class="btn btn-primary">Salvar</button>
       </div>
     </form>

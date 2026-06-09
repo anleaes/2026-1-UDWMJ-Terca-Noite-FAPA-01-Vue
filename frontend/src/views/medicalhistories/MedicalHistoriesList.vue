@@ -27,14 +27,14 @@ async function remove(id) {
   <div class="table-card">
     <table>
       <thead>
-        <tr><th>#</th><th>Alergias</th><th>Histórico Familiar</th><th>Nome do Paciente</th><th></th></tr>
+        <tr><th>#</th><th>Nome do Paciente</th><th>Alergias</th><th>Histórico Familiar</th><th></th></tr>
       </thead>
       <tbody>
         <tr v-for="h in histories" :key="h.id">
           <td class="td-mono">{{ h.id }}</td>
+          <td>{{ h.patient_name?.slice(0,30) }}</td>
           <td class="td-muted">{{ h.allergies?.slice(0,40) }}</td>
           <td class="td-muted">{{ h.family_history?.slice(0,40) }}</td>
-          <td class="td-muted">{{ h.patient_name?.slice(0,30) }}</td>
           <td>
             <div class="actions">
               <RouterLink :to="`/medicalhistories/${h.id}/edit`" class="btn btn-sm btn-ghost">Editar</RouterLink>

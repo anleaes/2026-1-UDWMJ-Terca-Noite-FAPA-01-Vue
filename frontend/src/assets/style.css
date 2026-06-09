@@ -1,6 +1,6 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0f1117;
+  --bg: #13161f;
   --surface: #171b26;
   --surface2: #1e2333;
   --border: #2a2f42;
@@ -50,6 +50,7 @@ body {
   letter-spacing: -0.5px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 16px;
+  text-decoration: none;
 }
 
 .logo span { color: var(--text2); font-weight: 300; }
@@ -59,7 +60,7 @@ body {
   font-size: 10px;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: var(--text3);
+  color: #7a8099;
   font-weight: 500;
 }
 
@@ -68,7 +69,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 10px 20px;
-  color: var(--text2);
+  color: #b0b5cc;
   font-size: 14px;
   cursor: pointer;
   text-decoration: none;
