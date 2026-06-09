@@ -66,7 +66,7 @@ async function remove() {
         </div>
         <div v-if="selectedCids.length" class="form-group full">
           <label>CIDs</label>
-          <div class="field-value">{{ selectedCids.map(c => `${c.code} — ${c.description}`).join(', ') }}</div>
+          <div class="field-value">{{ selectedCids.map(c => `${c.name} - ${c.description}`).join(', ') }}</div>
         </div>
         <div v-if="consult.anamnesis" class="form-group full">
           <label>Anamnese</label>

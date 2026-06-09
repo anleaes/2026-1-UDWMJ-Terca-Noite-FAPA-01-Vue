@@ -1,6 +1,5 @@
 <script setup>
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import { computed } from 'vue'
 
 const route = useRoute()
 const isActive = (path) => route.path.startsWith(path)

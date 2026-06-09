@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 
@@ -10,9 +10,20 @@ const id = route.params.id
 const form = ref({ patient: '', doctor: '', appointment_date: '', status: 'AG', cid: [], anamnesis: '' })
 const exame = ref('N')
 const cidOpen = ref(false)
+const cidSearch = ref('')
 const patients = ref([])
 const doctors = ref([])
 const cids = ref([])
+
+const filteredCids = computed(() => {
+  const q = cidSearch.value.trim().toLowerCase()
+  if (!q) return cids.value
+  return cids.value.filter(c =>
+    (c.code ?? '').toLowerCase().includes(q) ||
+    (c.name ?? '').toLowerCase().includes(q) ||
+    (c.description ?? '').toLowerCase().includes(q)
+  )
+})
 
 onMounted(async () => {
   const [rp, rd, rc] = await Promise.all([
@@ -85,11 +96,23 @@ async function save() {
               <span style="font-size:10px; transition:transform 0.2s" :style="cidOpen ? 'transform:rotate(90deg)' : ''">▶</span>
               {{ form.cid.length ? `${form.cid.length} selecionado(s)` : 'Selecionar CIDs' }}
             </button>
-            <div v-if="cidOpen" style="padding:8px 12px 12px; display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto; border-top:1px solid var(--border)">
-              <label v-for="c in cids" :key="c.id" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:normal">
-                <input type="checkbox" :value="c.id" v-model="form.cid" style="width:auto" />
-                {{ c.code }} — {{ c.description }}
-              </label>
+            <div v-if="cidOpen" style="border-top:1px solid var(--border)">
+              <div style="padding:8px 12px">
+                <input
+                  v-model="cidSearch"
+                  type="text"
+                  placeholder="Buscar por código ou doença..."
+                  style="width:100%; padding:8px 10px; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:13px; outline:none;"
+                  @click.stop
+                />
+              </div>
+              <div style="padding:0 12px 12px; display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;">
+                <label v-for="c in filteredCids" :key="c.id" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:normal">
+                  <input type="checkbox" :value="c.id" v-model="form.cid" style="width:auto" />
+                  {{ c.name }} - {{ c.description }}
+                </label>
+                <span v-if="filteredCids.length === 0" style="font-size:13px; color:var(--text3); padding:8px 0">Nenhum CID encontrado.</span>
+              </div>
             </div>
           </div>
         </div>
