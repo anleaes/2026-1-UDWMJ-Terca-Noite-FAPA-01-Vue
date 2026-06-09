@@ -2,7 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
 
+const { show } = useToast()
 const router = useRouter()
 const route = useRoute()
 const id = route.params.id
@@ -17,12 +19,17 @@ onMounted(async () => {
 })
 
 async function save() {
-  if (id) {
-    await axios.put(`http://localhost:8000/api/medicalhistories/${id}/`, form.value)
-  } else {
-    await axios.post('http://localhost:8000/api/medicalhistories/', form.value)
+  try {
+    if (id) {
+      await axios.put(`http://localhost:8000/api/medicalhistories/${id}/`, form.value)
+    } else {
+      await axios.post('http://localhost:8000/api/medicalhistories/', form.value)
+    }
+    show(id ? 'Histórico atualizado com sucesso.' : 'Histórico criado com sucesso.')
+    router.push('/medicalhistories')
+  } catch {
+    show('Erro ao salvar histórico.', 'error')
   }
-  router.push('/medicalhistories')
 }
 </script>
 

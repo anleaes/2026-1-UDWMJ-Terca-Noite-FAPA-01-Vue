@@ -2,7 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
 
+const { show } = useToast()
 const router = useRouter()
 const route = useRoute()
 const id = route.params.id
@@ -21,20 +23,25 @@ onMounted(async () => {
 })
 
 async function save() {
-  if (id) {
-    await axios.put(`http://localhost:8000/api/patients/${id}/`, form.value)
-  } else {
-    const historyRes = await axios.post('http://localhost:8000/api/medicalhistories/', {
-      patient_name: form.value.name,
-      allergies: historyForm.value.allergies,
-      family_history: historyForm.value.family_history,
-    })
-    await axios.post('http://localhost:8000/api/patients/', {
-      ...form.value,
-      allergies: historyRes.data.id,
-    })
+  try {
+    if (id) {
+      await axios.put(`http://localhost:8000/api/patients/${id}/`, form.value)
+    } else {
+      const historyRes = await axios.post('http://localhost:8000/api/medicalhistories/', {
+        patient_name: form.value.name,
+        allergies: historyForm.value.allergies,
+        family_history: historyForm.value.family_history,
+      })
+      await axios.post('http://localhost:8000/api/patients/', {
+        ...form.value,
+        allergies: historyRes.data.id,
+      })
+    }
+    show(id ? 'Paciente atualizado com sucesso.' : 'Paciente cadastrado com sucesso.')
+    router.push('/patients')
+  } catch {
+    show('Erro ao salvar paciente.', 'error')
   }
-  router.push('/patients')
 }
 </script>
 

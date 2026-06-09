@@ -1,12 +1,16 @@
 <script setup>
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { Tag, Pill, ClipboardList, Users, Stethoscope, CalendarDays, FlaskConical, FileText } from 'lucide-vue-next'
+import ToastContainer from './components/ToastContainer.vue'
+import ConfirmModal from './components/ConfirmModal.vue'
 
 const route = useRoute()
 const isActive = (path) => route.path.startsWith(path)
 </script>
 
 <template>
+  <ToastContainer />
+  <ConfirmModal />
   <aside class="sidebar">
     <RouterLink to="/" class="logo">Clínica<span>App</span></RouterLink>
 

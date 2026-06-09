@@ -2,7 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
 
+const { show } = useToast()
 const router = useRouter()
 const route = useRoute()
 const id = route.params.id
@@ -20,12 +22,17 @@ onMounted(async () => {
 })
 
 async function save() {
-  if (id) {
-    await axios.put(`http://localhost:8000/api/exams/${id}/`, form.value)
-  } else {
-    await axios.post('http://localhost:8000/api/exams/', form.value)
+  try {
+    if (id) {
+      await axios.put(`http://localhost:8000/api/exams/${id}/`, form.value)
+    } else {
+      await axios.post('http://localhost:8000/api/exams/', form.value)
+    }
+    show(id ? 'Exame atualizado com sucesso.' : 'Exame criado com sucesso.')
+    router.push('/exams')
+  } catch {
+    show('Erro ao salvar exame.', 'error')
   }
-  router.push('/exams')
 }
 </script>
 

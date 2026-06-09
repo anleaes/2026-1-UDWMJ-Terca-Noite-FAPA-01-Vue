@@ -1,8 +1,23 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
+import { useConfirm } from '../../composables/useConfirm.js'
+
+const { show } = useToast()
+const { confirm } = useConfirm()
 
 const prescriptions = ref([])
+const search = ref('')
+
+const filtered = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  if (!q) return prescriptions.value
+  return prescriptions.value.filter(p =>
+    p.patient_name?.toLowerCase().includes(q) ||
+    p.doctor_name?.toLowerCase().includes(q)
+  )
+})
 
 onMounted(async () => {
   const res = await axios.get('http://localhost:8000/api/prescriptions/')
@@ -10,9 +25,15 @@ onMounted(async () => {
 })
 
 async function remove(id) {
-  if (!confirm('Excluir esta receita?')) return
-  await axios.delete(`http://localhost:8000/api/prescriptions/${id}/`)
-  prescriptions.value = prescriptions.value.filter(p => p.id !== id)
+  const ok = await confirm('Excluir esta receita?')
+  if (!ok) return
+  try {
+    await axios.delete(`http://localhost:8000/api/prescriptions/${id}/`)
+    prescriptions.value = prescriptions.value.filter(p => p.id !== id)
+    show('Receita excluída com sucesso.')
+  } catch {
+    show('Erro ao excluir receita.', 'error')
+  }
 }
 </script>
 
@@ -24,13 +45,23 @@ async function remove(id) {
     </div>
     <RouterLink to="/prescriptions/add" class="btn btn-primary">+ Nova Receita</RouterLink>
   </div>
+
+  <div class="toolbar">
+    <input
+      v-model="search"
+      type="text"
+      class="search-input"
+      placeholder="Buscar por paciente ou médico..."
+    />
+  </div>
+
   <div class="table-card">
     <table>
       <thead>
         <tr><th>#</th><th>Paciente</th><th>Médico</th><th>Emitida em</th><th></th></tr>
       </thead>
       <tbody>
-        <tr v-for="p in prescriptions" :key="p.id">
+        <tr v-for="p in filtered" :key="p.id">
           <td class="td-mono">{{ p.id }}</td>
           <td><RouterLink :to="`/prescriptions/${p.id}`">{{ p.patient_name }}</RouterLink></td>
           <td class="td-muted">{{ p.doctor_name }}</td>
@@ -42,8 +73,8 @@ async function remove(id) {
             </div>
           </td>
         </tr>
-        <tr v-if="prescriptions.length === 0" class="empty-row">
-          <td colspan="5">Nenhuma receita cadastrada.</td>
+        <tr v-if="filtered.length === 0" class="empty-row">
+          <td colspan="5">{{ search ? 'Nenhum resultado encontrado.' : 'Nenhuma receita cadastrada.' }}</td>
         </tr>
       </tbody>
     </table>
