@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import HomeView from '../views/HomeView.vue'
 import CidsList from '../views/cids/CidsList.vue'
 import CidsForm from '../views/cids/CidsForm.vue'
 import MedicationsList from '../views/medications/MedicationsList.vue'
@@ -24,7 +25,7 @@ import PrescriptionsDetail from '../views/prescriptions/PrescriptionsDetail.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', redirect: '/patients' },
+    { path: '/', component: HomeView },
 
     { path: '/cids', component: CidsList },
     { path: '/cids/add', component: CidsForm },
