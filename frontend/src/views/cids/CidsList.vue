@@ -1,8 +1,23 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
+import { useConfirm } from '../../composables/useConfirm.js'
+
+const { show } = useToast()
+const { confirm } = useConfirm()
 
 const cids = ref([])
+const search = ref('')
+
+const filtered = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  if (!q) return cids.value
+  return cids.value.filter(c =>
+    c.name?.toLowerCase().includes(q) ||
+    c.description?.toLowerCase().includes(q)
+  )
+})
 
 onMounted(async () => {
   const res = await axios.get('http://localhost:8000/api/cids/')
@@ -10,9 +25,15 @@ onMounted(async () => {
 })
 
 async function remove(id) {
-  if (!confirm('Excluir este CID?')) return
-  await axios.delete(`http://localhost:8000/api/cids/${id}/`)
-  cids.value = cids.value.filter(c => c.id !== id)
+  const ok = await confirm('Excluir este CID?')
+  if (!ok) return
+  try {
+    await axios.delete(`http://localhost:8000/api/cids/${id}/`)
+    cids.value = cids.value.filter(c => c.id !== id)
+    show('CID excluído com sucesso.')
+  } catch {
+    show('Erro ao excluir CID.', 'error')
+  }
 }
 </script>
 
@@ -24,14 +45,24 @@ async function remove(id) {
     </div>
     <RouterLink to="/cids/add" class="btn btn-primary">+ Novo CID</RouterLink>
   </div>
+
+  <div class="toolbar">
+    <input
+      v-model="search"
+      type="text"
+      class="search-input"
+      placeholder="Buscar por código ou descrição..."
+    />
+  </div>
+
   <div class="table-card">
     <table>
       <thead>
-        <tr><th>Nome</th><th>Descrição</th><th></th></tr>
+        <tr><th>Código</th><th>Descrição</th><th></th></tr>
       </thead>
       <tbody>
-        <tr v-for="c in cids" :key="c.id">
-          <td>{{ c.name }}</td>
+        <tr v-for="c in filtered" :key="c.id">
+          <td class="td-mono">{{ c.name }}</td>
           <td class="td-muted">{{ c.description?.slice(0, 60) }}{{ c.description?.length > 60 ? '...' : '' }}</td>
           <td>
             <div class="actions">
@@ -40,8 +71,8 @@ async function remove(id) {
             </div>
           </td>
         </tr>
-        <tr v-if="cids.length === 0" class="empty-row">
-          <td colspan="3">Nenhum CID cadastrado.</td>
+        <tr v-if="filtered.length === 0" class="empty-row">
+          <td colspan="3">{{ search ? 'Nenhum resultado encontrado.' : 'Nenhum CID cadastrado.' }}</td>
         </tr>
       </tbody>
     </table>

@@ -2,7 +2,9 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
 
+const { show } = useToast()
 const router = useRouter()
 const route = useRoute()
 const id = route.params.id
@@ -41,12 +43,18 @@ onMounted(async () => {
 })
 
 async function save() {
-  if (id) {
-    await axios.put(`http://localhost:8000/api/consults/${id}/`, form.value)
-    router.push('/consults')
-  } else {
-    await axios.post('http://localhost:8000/api/consults/', form.value)
-    router.push(exame.value === 'S' ? '/exams/add' : '/consults')
+  try {
+    if (id) {
+      await axios.put(`http://localhost:8000/api/consults/${id}/`, form.value)
+      show('Consulta atualizada com sucesso.')
+      router.push('/consults')
+    } else {
+      await axios.post('http://localhost:8000/api/consults/', form.value)
+      show('Consulta criada com sucesso.')
+      router.push(exame.value === 'S' ? '/exams/add' : '/consults')
+    }
+  } catch {
+    show('Erro ao salvar consulta.', 'error')
   }
 }
 </script>

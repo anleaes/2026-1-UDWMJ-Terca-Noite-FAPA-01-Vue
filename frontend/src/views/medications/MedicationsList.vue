@@ -1,8 +1,23 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
+import { useConfirm } from '../../composables/useConfirm.js'
+
+const { show } = useToast()
+const { confirm } = useConfirm()
 
 const medications = ref([])
+const search = ref('')
+
+const filtered = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  if (!q) return medications.value
+  return medications.value.filter(m =>
+    m.medication?.toLowerCase().includes(q) ||
+    m.brand?.toLowerCase().includes(q)
+  )
+})
 
 onMounted(async () => {
   const res = await axios.get('http://localhost:8000/api/medications/')
@@ -10,9 +25,15 @@ onMounted(async () => {
 })
 
 async function remove(id) {
-  if (!confirm('Excluir este medicamento?')) return
-  await axios.delete(`http://localhost:8000/api/medications/${id}/`)
-  medications.value = medications.value.filter(m => m.id !== id)
+  const ok = await confirm('Excluir este medicamento?')
+  if (!ok) return
+  try {
+    await axios.delete(`http://localhost:8000/api/medications/${id}/`)
+    medications.value = medications.value.filter(m => m.id !== id)
+    show('Medicamento excluído com sucesso.')
+  } catch {
+    show('Erro ao excluir medicamento.', 'error')
+  }
 }
 </script>
 
@@ -24,13 +45,23 @@ async function remove(id) {
     </div>
     <RouterLink to="/medications/add" class="btn btn-primary">+ Novo Medicamento</RouterLink>
   </div>
+
+  <div class="toolbar">
+    <input
+      v-model="search"
+      type="text"
+      class="search-input"
+      placeholder="Buscar por medicamento ou marca..."
+    />
+  </div>
+
   <div class="table-card">
     <table>
       <thead>
         <tr><th>Medicamento</th><th>Marca</th><th></th></tr>
       </thead>
       <tbody>
-        <tr v-for="m in medications" :key="m.id">
+        <tr v-for="m in filtered" :key="m.id">
           <td>{{ m.medication }}</td>
           <td class="td-muted">{{ m.brand }}</td>
           <td>
@@ -40,8 +71,8 @@ async function remove(id) {
             </div>
           </td>
         </tr>
-        <tr v-if="medications.length === 0" class="empty-row">
-          <td colspan="3">Nenhum medicamento cadastrado.</td>
+        <tr v-if="filtered.length === 0" class="empty-row">
+          <td colspan="3">{{ search ? 'Nenhum resultado encontrado.' : 'Nenhum medicamento cadastrado.' }}</td>
         </tr>
       </tbody>
     </table>

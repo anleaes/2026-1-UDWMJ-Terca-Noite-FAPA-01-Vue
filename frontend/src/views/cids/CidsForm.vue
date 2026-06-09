@@ -2,7 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
 
+const { show } = useToast()
 const router = useRouter()
 const route = useRoute()
 const id = route.params.id
@@ -17,12 +19,17 @@ onMounted(async () => {
 })
 
 async function save() {
-  if (id) {
-    await axios.put(`http://localhost:8000/api/cids/${id}/`, form.value)
-  } else {
-    await axios.post('http://localhost:8000/api/cids/', form.value)
+  try {
+    if (id) {
+      await axios.put(`http://localhost:8000/api/cids/${id}/`, form.value)
+    } else {
+      await axios.post('http://localhost:8000/api/cids/', form.value)
+    }
+    show(id ? 'CID atualizado com sucesso.' : 'CID criado com sucesso.')
+    router.push('/cids')
+  } catch {
+    show('Erro ao salvar CID.', 'error')
   }
-  router.push('/cids')
 }
 </script>
 
