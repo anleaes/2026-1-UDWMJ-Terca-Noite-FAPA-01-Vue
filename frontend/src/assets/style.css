@@ -24,6 +24,12 @@ body {
   min-height: 100vh;
 }
 
+#app {
+  display: flex;
+  flex: 1;
+  min-height: 100vh;
+}
+
 .sidebar {
   width: var(--sidebar);
   background: var(--surface);

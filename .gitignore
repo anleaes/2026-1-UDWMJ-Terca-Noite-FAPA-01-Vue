@@ -23,14 +23,15 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+.claude/
 
 *.tsbuildinfo
 
 .eslintcache
 
 # Cypress
-/cypress/videos/
-/cypress/screenshots/
+frontend/cypress/videos/
+frontend/cypress/screenshots/
 
 # Vitest
 __screenshots__/

@@ -1,10 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import axios from 'axios'
 
 const patients = ref([])
-const router = useRouter()
 
 onMounted(async () => {
   const res = await axios.get('http://localhost:8000/api/patients/')
