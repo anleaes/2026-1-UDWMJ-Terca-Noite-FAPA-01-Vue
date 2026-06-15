@@ -2,27 +2,49 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
+import { useConfirm } from '../../composables/useConfirm.js'
 
+const { show } = useToast()
+const { confirm } = useConfirm()
 const router = useRouter()
 const route = useRoute()
 const id = route.params.id
 
 const prescription = ref(null)
 const items = ref([])
+const medications = ref([])
 
 onMounted(async () => {
-  const [rp, ri] = await Promise.all([
-    axios.get(`http://localhost:8000/api/prescriptions/${id}/`),
-    axios.get('http://localhost:8000/api/prescriptionitems/'),
-  ])
-  prescription.value = rp.data
-  items.value = ri.data.filter(i => i.prescription === Number(id))
+  try {
+    const [rp, ri, rm] = await Promise.all([
+      axios.get(`prescriptions/${id}/`),
+      axios.get('prescriptionitems/'),
+      axios.get('medications/'),
+    ])
+    prescription.value = rp.data
+    items.value = ri.data.filter(i => i.prescription === Number(id))
+    medications.value = rm.data
+  } catch {
+    show('Erro ao carregar receita.', 'error')
+  }
 })
 
+function getMedName(medId) {
+  const m = medications.value.find(m => m.id === medId)
+  return m ? `${m.medication} — ${m.brand}` : medId
+}
+
 async function remove() {
-  if (!confirm('Excluir esta receita?')) return
-  await axios.delete(`http://localhost:8000/api/prescriptions/${id}/`)
-  router.push('/prescriptions')
+  const ok = await confirm('Excluir esta receita?')
+  if (!ok) return
+  try {
+    await axios.delete(`prescriptions/${id}/`)
+    show('Receita excluída com sucesso.')
+    router.push('/prescriptions')
+  } catch {
+    show('Erro ao excluir receita.', 'error')
+  }
 }
 </script>
 
@@ -74,7 +96,7 @@ async function remove() {
             </thead>
             <tbody>
               <tr v-for="item in items" :key="item.id">
-                <td>{{ item.medication }}</td>
+                <td>{{ getMedName(item.medication) }}</td>
                 <td class="td-muted">{{ item.quantity }}</td>
                 <td class="td-muted">{{ item.dosage }}</td>
                 <td class="td-muted">{{ item.frequency }}</td>

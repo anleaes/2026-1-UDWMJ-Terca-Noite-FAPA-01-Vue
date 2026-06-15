@@ -13,20 +13,24 @@ const form = ref({ consult: '', exam_type: '', status: 'SO' })
 const consults = ref([])
 
 onMounted(async () => {
-  const rc = await axios.get('http://localhost:8000/api/consults/')
-  consults.value = rc.data
-  if (id) {
-    const r = await axios.get(`http://localhost:8000/api/exams/${id}/`)
-    form.value = r.data
+  try {
+    const rc = await axios.get('consults/')
+    consults.value = rc.data
+    if (id) {
+      const r = await axios.get(`exams/${id}/`)
+      form.value = r.data
+    }
+  } catch {
+    show('Erro ao carregar dados.', 'error')
   }
 })
 
 async function save() {
   try {
     if (id) {
-      await axios.put(`http://localhost:8000/api/exams/${id}/`, form.value)
+      await axios.put(`exams/${id}/`, form.value)
     } else {
-      await axios.post('http://localhost:8000/api/exams/', form.value)
+      await axios.post('exams/', form.value)
     }
     show(id ? 'Exame atualizado com sucesso.' : 'Exame criado com sucesso.')
     router.push('/exams')

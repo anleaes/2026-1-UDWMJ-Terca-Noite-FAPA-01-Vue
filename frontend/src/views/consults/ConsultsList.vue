@@ -63,15 +63,19 @@ function formatDate(dt) {
 }
 
 onMounted(async () => {
-  const res = await axios.get('http://localhost:8000/api/consults/')
-  consults.value = res.data
+  try {
+    const res = await axios.get('consults/')
+    consults.value = res.data
+  } catch {
+    show('Erro ao carregar consultas.', 'error')
+  }
 })
 
 async function updateStatus(consult, newStatus) {
   const old = consult.status
   consult.status = newStatus
   try {
-    await axios.patch(`http://localhost:8000/api/consults/${consult.id}/`, { status: newStatus })
+    await axios.patch(`consults/${consult.id}/`, { status: newStatus })
     show('Status atualizado.')
   } catch {
     consult.status = old
@@ -83,7 +87,7 @@ async function remove(id) {
   const ok = await confirm('Excluir esta consulta?')
   if (!ok) return
   try {
-    await axios.delete(`http://localhost:8000/api/consults/${id}/`)
+    await axios.delete(`consults/${id}/`)
     consults.value = consults.value.filter(c => c.id !== id)
     show('Consulta excluída com sucesso.')
   } catch {

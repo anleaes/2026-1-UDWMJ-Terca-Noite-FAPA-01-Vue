@@ -2,22 +2,30 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
+import { useConfirm } from '../../composables/useConfirm.js'
+import { STATUS_LABELS } from '../../constants.js'
 
+const { show } = useToast()
+const { confirm } = useConfirm()
 const router = useRouter()
 const route = useRoute()
 const id = route.params.id
 
 const consult = ref(null)
 const allCids = ref([])
-const STATUS_LABELS = { AG: 'Agendada', AT: 'Em Atendimento', CO: 'Concluída', CA: 'Cancelada' }
 
 onMounted(async () => {
-  const [rc, rcids] = await Promise.all([
-    axios.get(`http://localhost:8000/api/consults/${id}/`),
-    axios.get('http://localhost:8000/api/cids/'),
-  ])
-  consult.value = rc.data
-  allCids.value = rcids.data
+  try {
+    const [rc, rcids] = await Promise.all([
+      axios.get(`consults/${id}/`),
+      axios.get('cids/'),
+    ])
+    consult.value = rc.data
+    allCids.value = rcids.data
+  } catch {
+    show('Erro ao carregar consulta.', 'error')
+  }
 })
 
 const selectedCids = computed(() =>
@@ -25,9 +33,15 @@ const selectedCids = computed(() =>
 )
 
 async function remove() {
-  if (!confirm('Excluir esta consulta?')) return
-  await axios.delete(`http://localhost:8000/api/consults/${id}/`)
-  router.push('/consults')
+  const ok = await confirm('Excluir esta consulta?')
+  if (!ok) return
+  try {
+    await axios.delete(`consults/${id}/`)
+    show('Consulta excluída com sucesso.')
+    router.push('/consults')
+  } catch {
+    show('Erro ao excluir consulta.', 'error')
+  }
 }
 </script>
 

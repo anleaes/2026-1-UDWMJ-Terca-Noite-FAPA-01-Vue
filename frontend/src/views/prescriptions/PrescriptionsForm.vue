@@ -55,7 +55,7 @@ function selectMedication(medId) {
 }
 
 function getMedName(medId) {
-  const m = medications.value.find(m => m.id == medId)
+  const m = medications.value.find(m => m.id === medId)
   return m ? `${m.medication} — ${m.brand}` : 'Selecionar Medicamento'
 }
 
@@ -78,28 +78,32 @@ function onOutsideClick(e) {
 onMounted(async () => {
   document.addEventListener('click', onOutsideClick)
 
-  const [rc, rp, rd, rm] = await Promise.all([
-    axios.get('http://localhost:8000/api/consults/'),
-    axios.get('http://localhost:8000/api/patients/'),
-    axios.get('http://localhost:8000/api/doctors/'),
-    axios.get('http://localhost:8000/api/medications/'),
-  ])
-  consults.value = rc.data
-  patients.value = rp.data
-  doctors.value = rd.data
-  medications.value = rm.data
+  try {
+    const [rc, rp, rd, rm] = await Promise.all([
+      axios.get('consults/'),
+      axios.get('patients/'),
+      axios.get('doctors/'),
+      axios.get('medications/'),
+    ])
+    consults.value = rc.data
+    patients.value = rp.data
+    doctors.value = rd.data
+    medications.value = rm.data
 
-  if (id) {
-    const r = await axios.get(`http://localhost:8000/api/prescriptions/${id}/`)
-    form.value = r.data
+    if (id) {
+      const r = await axios.get(`prescriptions/${id}/`)
+      form.value = r.data
 
-    const ri = await axios.get('http://localhost:8000/api/prescriptionitems/')
-    const existingItems = ri.data.filter(i => i.prescription == id)
-    items.value = existingItems.map(i => ({ ...i, toDelete: false }))
-  }
+      const ri = await axios.get('prescriptionitems/')
+      const existingItems = ri.data.filter(i => i.prescription === Number(id))
+      items.value = existingItems.map(i => ({ ...i, toDelete: false }))
+    }
 
-  if (items.value.length === 0) {
-    items.value.push(newItem())
+    if (items.value.length === 0) {
+      items.value.push(newItem())
+    }
+  } catch {
+    show('Erro ao carregar dados.', 'error')
   }
 })
 
@@ -111,15 +115,15 @@ async function save() {
   try {
     let prescriptionId = id
     if (id) {
-      await axios.put(`http://localhost:8000/api/prescriptions/${id}/`, form.value)
+      await axios.put(`prescriptions/${id}/`, form.value)
     } else {
-      const r = await axios.post('http://localhost:8000/api/prescriptions/', form.value)
+      const r = await axios.post('prescriptions/', form.value)
       prescriptionId = r.data.id
     }
 
     for (const item of items.value) {
       if (item.toDelete && item.id) {
-        await axios.delete(`http://localhost:8000/api/prescriptionitems/${item.id}/`)
+        await axios.delete(`prescriptionitems/${item.id}/`)
       } else if (!item.toDelete && item.medication) {
         const payload = {
           prescription: prescriptionId,
@@ -130,9 +134,9 @@ async function save() {
           duration: item.duration,
         }
         if (item.id) {
-          await axios.put(`http://localhost:8000/api/prescriptionitems/${item.id}/`, payload)
+          await axios.put(`prescriptionitems/${item.id}/`, payload)
         } else {
-          await axios.post('http://localhost:8000/api/prescriptionitems/', payload)
+          await axios.post('prescriptionitems/', payload)
         }
       }
     }
@@ -264,7 +268,7 @@ async function save() {
           :key="m.id"
           @click="selectMedication(m.id)"
           style="padding:6px 8px; border-radius:6px; cursor:pointer; font-size:13px;"
-          :style="items[openMedIndex]?.medication == m.id ? 'background:var(--primary); color:#fff' : 'color:var(--text)'"
+          :style="items[openMedIndex]?.medication === m.id ? 'background:var(--primary); color:#fff' : 'color:var(--text)'"
           @mouseenter="e => { if(items[openMedIndex]?.medication != m.id) e.currentTarget.style.background='var(--surface3)' }"
           @mouseleave="e => { if(items[openMedIndex]?.medication != m.id) e.currentTarget.style.background='' }"
         >

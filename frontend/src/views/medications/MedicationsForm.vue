@@ -13,17 +13,21 @@ const form = ref({ medication: '', brand: '' })
 
 onMounted(async () => {
   if (id) {
-    const r = await axios.get(`http://localhost:8000/api/medications/${id}/`)
-    form.value = r.data
+    try {
+      const r = await axios.get(`medications/${id}/`)
+      form.value = r.data
+    } catch {
+      show('Erro ao carregar medicamento.', 'error')
+    }
   }
 })
 
 async function save() {
   try {
     if (id) {
-      await axios.put(`http://localhost:8000/api/medications/${id}/`, form.value)
+      await axios.put(`medications/${id}/`, form.value)
     } else {
-      await axios.post('http://localhost:8000/api/medications/', form.value)
+      await axios.post('medications/', form.value)
     }
     show(id ? 'Medicamento atualizado com sucesso.' : 'Medicamento criado com sucesso.')
     router.push('/medications')
