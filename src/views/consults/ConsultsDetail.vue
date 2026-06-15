@@ -15,6 +15,7 @@ const id = route.params.id
 const consult = ref(null)
 const allCids = ref([])
 
+// carrega consultas e CIDs ao mesmo tempo para cruzar depois
 onMounted(async () => {
   try {
     const [rc, rcids] = await Promise.all([
@@ -28,10 +29,12 @@ onMounted(async () => {
   }
 })
 
+// filtra apenas os CIDs que estão vinculados na consuta
 const selectedCids = computed(() =>
   allCids.value.filter(c => consult.value?.cid?.includes(c.id))
 )
 
+// exclui a consulta e volta para a lista
 async function remove() {
   const ok = await confirm('Excluir esta consulta?')
   if (!ok) return

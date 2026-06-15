@@ -9,7 +9,8 @@ axios.defaults.baseURL = 'http://localhost:8000/api/'
 
 const { show } = useToast()
 
-let toastPending = false            //toast de erro e remove a default do navegador
+//toast de erro e remove a default do navegador
+let toastPending = false            
 document.addEventListener('invalid', (e) => {
   e.preventDefault()
   if (!toastPending) {

@@ -13,6 +13,7 @@ const search = ref('')
 const filterStatus = ref('')
 const filterDoctor = ref('')
 
+// opções para tabela de status
 const statusOptions = [
   { value: 'AG', label: 'Agendada',        colorClass: 'color-blue' },
   { value: 'AT', label: 'Em Atendimento',  colorClass: 'color-yellow' },
@@ -20,11 +21,13 @@ const statusOptions = [
   { value: 'CA', label: 'Cancelada',       colorClass: 'color-red' },
 ]
 
+// gera a lista sem repetir
 const uniqueDoctors = computed(() => {
   const names = [...new Set(consults.value.map(c => c.doctor_name).filter(Boolean))]
   return names.sort()
 })
 
+// aplica os três filtros em sequência (texto,status,médico)
 const filtered = computed(() => {
   let list = consults.value
 
@@ -47,10 +50,12 @@ const filtered = computed(() => {
   return list
 })
 
+// verifica para mostrar o botão limpar filtros
 const hasFilters = computed(() =>
   search.value || filterStatus.value || filterDoctor.value
 )
 
+// limpa todos os filtros 
 function clearFilters() {
   search.value = ''
   filterStatus.value = ''
@@ -62,6 +67,7 @@ function formatDate(dt) {
   return new Date(dt).toLocaleString('pt-BR')
 }
 
+// carrega consultas ao abrir tela
 onMounted(async () => {
   try {
     const res = await axios.get('consults/')
@@ -71,6 +77,7 @@ onMounted(async () => {
   }
 })
 
+// atualiza o status direto na tabela 
 async function updateStatus(consult, newStatus) {
   const old = consult.status
   consult.status = newStatus
@@ -78,11 +85,12 @@ async function updateStatus(consult, newStatus) {
     await axios.patch(`consults/${consult.id}/`, { status: newStatus })
     show('Status atualizado.')
   } catch {
-    consult.status = old
+    consult.status = old // desfaz se der erro
     show('Erro ao atualizar status.', 'error')
   }
 }
 
+// exclui a consulta após confirmação
 async function remove(id) {
   const ok = await confirm('Excluir esta consulta?')
   if (!ok) return

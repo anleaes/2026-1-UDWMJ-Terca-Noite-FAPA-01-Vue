@@ -17,6 +17,7 @@ const patients = ref([])
 const doctors = ref([])
 const cids = ref([])
 
+// filtro de CIDs 
 const filteredCids = computed(() => {
   const q = cidSearch.value.trim().toLowerCase()
   if (!q) return cids.value
@@ -26,6 +27,7 @@ const filteredCids = computed(() => {
   )
 })
 
+// carrega pacientes medicos e cids
 onMounted(async () => {
   try {
     const [rp, rd, rc] = await Promise.all([
@@ -45,6 +47,7 @@ onMounted(async () => {
   }
 })
 
+// salva a consulta dependendo se tem id na URL
 async function save() {
   try {
     if (id) {
@@ -54,6 +57,7 @@ async function save() {
     } else {
       await axios.post('consults/', form.value)
       show('Consulta criada com sucesso.')
+      // se o usuário marcou que quer cadastrar exame, redireciona direto para a tela de exames
       router.push(exame.value === 'S' ? '/exams/add' : '/consults')
     }
   } catch {
