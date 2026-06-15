@@ -21,35 +21,38 @@ const filteredCids = computed(() => {
   const q = cidSearch.value.trim().toLowerCase()
   if (!q) return cids.value
   return cids.value.filter(c =>
-    (c.code ?? '').toLowerCase().includes(q) ||
     (c.name ?? '').toLowerCase().includes(q) ||
     (c.description ?? '').toLowerCase().includes(q)
   )
 })
 
 onMounted(async () => {
-  const [rp, rd, rc] = await Promise.all([
-    axios.get('http://localhost:8000/api/patients/'),
-    axios.get('http://localhost:8000/api/doctors/'),
-    axios.get('http://localhost:8000/api/cids/'),
-  ])
-  patients.value = rp.data
-  doctors.value = rd.data
-  cids.value = rc.data
-  if (id) {
-    const r = await axios.get(`http://localhost:8000/api/consults/${id}/`)
-    form.value = { ...r.data, appointment_date: r.data.appointment_date?.slice(0, 16) ?? '' }
+  try {
+    const [rp, rd, rc] = await Promise.all([
+      axios.get('patients/'),
+      axios.get('doctors/'),
+      axios.get('cids/'),
+    ])
+    patients.value = rp.data
+    doctors.value = rd.data
+    cids.value = rc.data
+    if (id) {
+      const r = await axios.get(`consults/${id}/`)
+      form.value = { ...r.data, appointment_date: r.data.appointment_date?.slice(0, 16) ?? '' }
+    }
+  } catch {
+    show('Erro ao carregar dados.', 'error')
   }
 })
 
 async function save() {
   try {
     if (id) {
-      await axios.put(`http://localhost:8000/api/consults/${id}/`, form.value)
+      await axios.put(`consults/${id}/`, form.value)
       show('Consulta atualizada com sucesso.')
       router.push('/consults')
     } else {
-      await axios.post('http://localhost:8000/api/consults/', form.value)
+      await axios.post('consults/', form.value)
       show('Consulta criada com sucesso.')
       router.push(exame.value === 'S' ? '/exams/add' : '/consults')
     }
@@ -99,27 +102,27 @@ async function save() {
         </div>
         <div class="form-group full">
           <label>CIDs</label>
-          <div style="border:1px solid var(--border); border-radius:8px; background:var(--surface2)">
-            <button type="button" @click="cidOpen = !cidOpen" style="width:100%; padding:10px 12px; background:none; border:none; color:var(--text); font-size:14px; text-align:left; cursor:pointer; display:flex; align-items:center; gap:8px;">
-              <span style="font-size:10px; transition:transform 0.2s" :style="cidOpen ? 'transform:rotate(90deg)' : ''">▶</span>
+          <div class="cid-selector">
+            <button type="button" @click="cidOpen = !cidOpen" class="cid-toggle">
+              <span class="cid-arrow" :class="{ open: cidOpen }">▶</span>
               {{ form.cid.length ? `${form.cid.length} selecionado(s)` : 'Selecionar CIDs' }}
             </button>
-            <div v-if="cidOpen" style="border-top:1px solid var(--border)">
-              <div style="padding:8px 12px">
+            <div v-if="cidOpen" class="cid-panel">
+              <div class="cid-search">
                 <input
                   v-model="cidSearch"
                   type="text"
                   placeholder="Buscar por código ou doença..."
-                  style="width:100%; padding:8px 10px; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:13px; outline:none;"
+                  class="cid-search-input"
                   @click.stop
                 />
               </div>
-              <div style="padding:0 12px 12px; display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;">
-                <label v-for="c in filteredCids" :key="c.id" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; font-weight:normal">
-                  <input type="checkbox" :value="c.id" v-model="form.cid" style="width:auto" />
+              <div class="cid-list">
+                <label v-for="c in filteredCids" :key="c.id" class="cid-option">
+                  <input type="checkbox" :value="c.id" v-model="form.cid" />
                   {{ c.name }} - {{ c.description }}
                 </label>
-                <span v-if="filteredCids.length === 0" style="font-size:13px; color:var(--text3); padding:8px 0">Nenhum CID encontrado.</span>
+                <span v-if="filteredCids.length === 0" class="cid-empty">Nenhum CID encontrado.</span>
               </div>
             </div>
           </div>
@@ -145,3 +148,82 @@ async function save() {
     </form>
   </div>
 </template>
+
+<style scoped>
+.cid-selector {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+}
+
+.cid-toggle {
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cid-arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.cid-arrow.open {
+  transform: rotate(90deg);
+}
+
+.cid-panel {
+  border-top: 1px solid var(--border);
+}
+
+.cid-search {
+  padding: 8px 12px;
+}
+
+.cid-search-input {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.cid-list {
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.cid-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.cid-option input[type="checkbox"] {
+  width: auto;
+}
+
+.cid-empty {
+  font-size: 13px;
+  color: var(--text3);
+  padding: 8px 0;
+}
+</style>

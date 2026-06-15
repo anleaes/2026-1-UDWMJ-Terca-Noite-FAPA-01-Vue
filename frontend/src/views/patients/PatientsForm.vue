@@ -14,25 +14,29 @@ const histories = ref([])
 const historyForm = ref({ allergies: '', family_history: '' })
 
 onMounted(async () => {
-  const res = await axios.get('http://localhost:8000/api/medicalhistories/')
-  histories.value = res.data
-  if (id) {
-    const r = await axios.get(`http://localhost:8000/api/patients/${id}/`)
-    form.value = r.data
+  try {
+    const res = await axios.get('medicalhistories/')
+    histories.value = res.data
+    if (id) {
+      const r = await axios.get(`patients/${id}/`)
+      form.value = r.data
+    }
+  } catch {
+    show('Erro ao carregar dados.', 'error')
   }
 })
 
 async function save() {
   try {
     if (id) {
-      await axios.put(`http://localhost:8000/api/patients/${id}/`, form.value)
+      await axios.put(`patients/${id}/`, form.value)
     } else {
-      const historyRes = await axios.post('http://localhost:8000/api/medicalhistories/', {
+      const historyRes = await axios.post('medicalhistories/', {
         patient_name: form.value.name,
         allergies: historyForm.value.allergies,
         family_history: historyForm.value.family_history,
       })
-      await axios.post('http://localhost:8000/api/patients/', {
+      await axios.post('patients/', {
         ...form.value,
         allergies: historyRes.data.id,
       })

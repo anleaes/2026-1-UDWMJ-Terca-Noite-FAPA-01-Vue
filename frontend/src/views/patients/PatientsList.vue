@@ -21,15 +21,19 @@ const filtered = computed(() => {
 })
 
 onMounted(async () => {
-  const res = await axios.get('http://localhost:8000/api/patients/')
-  patients.value = res.data
+  try {
+    const res = await axios.get('patients/')
+    patients.value = res.data
+  } catch {
+    show('Erro ao carregar pacientes.', 'error')
+  }
 })
 
 async function remove(id) {
   const ok = await confirm('Excluir este paciente?')
   if (!ok) return
   try {
-    await axios.delete(`http://localhost:8000/api/patients/${id}/`)
+    await axios.delete(`patients/${id}/`)
     patients.value = patients.value.filter(p => p.id !== id)
     show('Paciente excluído com sucesso.')
   } catch {

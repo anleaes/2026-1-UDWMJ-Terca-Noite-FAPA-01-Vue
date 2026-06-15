@@ -18,28 +18,30 @@ const statusOptions = [
   { value: 'CA', label: 'Cancelado',     colorClass: 'color-red' },
 ]
 
-const statusLabel = { SO: 'Solicitado', AT: 'Em Andamento', CO: 'Concluído', CA: 'Cancelado' }
-
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()
   if (!q) return exams.value
   return exams.value.filter(e =>
     e.exam_type?.toLowerCase().includes(q) ||
     String(e.consult).includes(q) ||
-    statusLabel[e.status]?.toLowerCase().includes(q)
+    statusOptions.find(o => o.value === e.status)?.label.toLowerCase().includes(q)
   )
 })
 
 onMounted(async () => {
-  const res = await axios.get('http://localhost:8000/api/exams/')
-  exams.value = res.data
+  try {
+    const res = await axios.get('exams/')
+    exams.value = res.data
+  } catch {
+    show('Erro ao carregar exames.', 'error')
+  }
 })
 
 async function updateStatus(exam, newStatus) {
   const old = exam.status
   exam.status = newStatus
   try {
-    await axios.patch(`http://localhost:8000/api/exams/${exam.id}/`, { status: newStatus })
+    await axios.patch(`exams/${exam.id}/`, { status: newStatus })
     show('Status atualizado.')
   } catch {
     exam.status = old
@@ -51,7 +53,7 @@ async function remove(id) {
   const ok = await confirm('Excluir este exame?')
   if (!ok) return
   try {
-    await axios.delete(`http://localhost:8000/api/exams/${id}/`)
+    await axios.delete(`exams/${id}/`)
     exams.value = exams.value.filter(e => e.id !== id)
     show('Exame excluído com sucesso.')
   } catch {
@@ -109,4 +111,3 @@ async function remove(id) {
     </table>
   </div>
 </template>
-

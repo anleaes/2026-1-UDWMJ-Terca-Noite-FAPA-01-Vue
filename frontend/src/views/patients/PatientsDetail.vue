@@ -2,7 +2,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
+import { useToast } from '../../composables/useToast.js'
+import { useConfirm } from '../../composables/useConfirm.js'
+import { SEX_LABELS } from '../../constants.js'
 
+const { show } = useToast()
+const { confirm } = useConfirm()
 const router = useRouter()
 const route = useRoute()
 const id = route.params.id
@@ -10,21 +15,29 @@ const id = route.params.id
 const patient = ref(null)
 const history = ref(null)
 
-const SEX_LABELS = { M: 'Masculino', F: 'Feminino', O: 'Outro' }
-
 onMounted(async () => {
-  const res = await axios.get(`http://localhost:8000/api/patients/${id}/`)
-  patient.value = res.data
-  if (res.data.allergies) {
-    const h = await axios.get(`http://localhost:8000/api/medicalhistories/${res.data.allergies}/`)
-    history.value = h.data
+  try {
+    const res = await axios.get(`patients/${id}/`)
+    patient.value = res.data
+    if (res.data.allergies) {
+      const h = await axios.get(`medicalhistories/${res.data.allergies}/`)
+      history.value = h.data
+    }
+  } catch {
+    show('Erro ao carregar paciente.', 'error')
   }
 })
 
 async function remove() {
-  if (!confirm('Excluir este paciente?')) return
-  await axios.delete(`http://localhost:8000/api/patients/${id}/`)
-  router.push('/patients')
+  const ok = await confirm('Excluir este paciente?')
+  if (!ok) return
+  try {
+    await axios.delete(`patients/${id}/`)
+    show('Paciente excluído com sucesso.')
+    router.push('/patients')
+  } catch {
+    show('Erro ao excluir paciente.', 'error')
+  }
 }
 </script>
 

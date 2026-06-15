@@ -20,16 +20,25 @@ const filtered = computed(() => {
   )
 })
 
+function truncate(text, max) {
+  if (!text) return ''
+  return text.length > max ? text.slice(0, max) + '...' : text
+}
+
 onMounted(async () => {
-  const res = await axios.get('http://localhost:8000/api/medicalhistories/')
-  histories.value = res.data
+  try {
+    const res = await axios.get('medicalhistories/')
+    histories.value = res.data
+  } catch {
+    show('Erro ao carregar históricos.', 'error')
+  }
 })
 
 async function remove(id) {
   const ok = await confirm('Excluir este histórico?')
   if (!ok) return
   try {
-    await axios.delete(`http://localhost:8000/api/medicalhistories/${id}/`)
+    await axios.delete(`medicalhistories/${id}/`)
     histories.value = histories.value.filter(h => h.id !== id)
     show('Histórico excluído com sucesso.')
   } catch {
@@ -64,9 +73,9 @@ async function remove(id) {
       <tbody>
         <tr v-for="h in filtered" :key="h.id">
           <td class="td-mono">{{ h.id }}</td>
-          <td>{{ h.patient_name?.slice(0, 30) }}</td>
-          <td class="td-muted">{{ h.allergies?.slice(0, 40) }}</td>
-          <td class="td-muted">{{ h.family_history?.slice(0, 40) }}</td>
+          <td>{{ truncate(h.patient_name, 30) }}</td>
+          <td class="td-muted">{{ truncate(h.allergies, 40) }}</td>
+          <td class="td-muted">{{ truncate(h.family_history, 40) }}</td>
           <td>
             <div class="actions">
               <RouterLink :to="`/medicalhistories/${h.id}/edit`" class="btn btn-sm btn-ghost">Editar</RouterLink>

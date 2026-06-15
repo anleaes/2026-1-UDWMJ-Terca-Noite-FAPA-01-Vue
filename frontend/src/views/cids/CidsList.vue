@@ -20,15 +20,19 @@ const filtered = computed(() => {
 })
 
 onMounted(async () => {
-  const res = await axios.get('http://localhost:8000/api/cids/')
-  cids.value = res.data
+  try {
+    const res = await axios.get('cids/')
+    cids.value = res.data
+  } catch {
+    show('Erro ao carregar CIDs.', 'error')
+  }
 })
 
 async function remove(id) {
   const ok = await confirm('Excluir este CID?')
   if (!ok) return
   try {
-    await axios.delete(`http://localhost:8000/api/cids/${id}/`)
+    await axios.delete(`cids/${id}/`)
     cids.value = cids.value.filter(c => c.id !== id)
     show('CID excluído com sucesso.')
   } catch {

@@ -13,17 +13,21 @@ const form = ref({ allergies: '', family_history: '', patient_name: '' })
 
 onMounted(async () => {
   if (id) {
-    const r = await axios.get(`http://localhost:8000/api/medicalhistories/${id}/`)
-    form.value = r.data
+    try {
+      const r = await axios.get(`medicalhistories/${id}/`)
+      form.value = r.data
+    } catch {
+      show('Erro ao carregar histórico.', 'error')
+    }
   }
 })
 
 async function save() {
   try {
     if (id) {
-      await axios.put(`http://localhost:8000/api/medicalhistories/${id}/`, form.value)
+      await axios.put(`medicalhistories/${id}/`, form.value)
     } else {
-      await axios.post('http://localhost:8000/api/medicalhistories/', form.value)
+      await axios.post('medicalhistories/', form.value)
     }
     show(id ? 'Histórico atualizado com sucesso.' : 'Histórico criado com sucesso.')
     router.push('/medicalhistories')

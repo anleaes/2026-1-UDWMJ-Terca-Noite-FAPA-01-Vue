@@ -13,17 +13,21 @@ const form = ref({ name: '', description: '' })
 
 onMounted(async () => {
   if (id) {
-    const r = await axios.get(`http://localhost:8000/api/cids/${id}/`)
-    form.value = r.data
+    try {
+      const r = await axios.get(`cids/${id}/`)
+      form.value = r.data
+    } catch {
+      show('Erro ao carregar CID.', 'error')
+    }
   }
 })
 
 async function save() {
   try {
     if (id) {
-      await axios.put(`http://localhost:8000/api/cids/${id}/`, form.value)
+      await axios.put(`cids/${id}/`, form.value)
     } else {
-      await axios.post('http://localhost:8000/api/cids/', form.value)
+      await axios.post('cids/', form.value)
     }
     show(id ? 'CID atualizado com sucesso.' : 'CID criado com sucesso.')
     router.push('/cids')

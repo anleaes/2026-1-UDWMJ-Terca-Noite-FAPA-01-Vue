@@ -13,17 +13,21 @@ const form = ref({ name: '', cpf: '', birth_date: '', email: '', sex: '', crm: '
 
 onMounted(async () => {
   if (id) {
-    const r = await axios.get(`http://localhost:8000/api/doctors/${id}/`)
-    form.value = r.data
+    try {
+      const r = await axios.get(`doctors/${id}/`)
+      form.value = r.data
+    } catch {
+      show('Erro ao carregar médico.', 'error')
+    }
   }
 })
 
 async function save() {
   try {
     if (id) {
-      await axios.put(`http://localhost:8000/api/doctors/${id}/`, form.value)
+      await axios.put(`doctors/${id}/`, form.value)
     } else {
-      await axios.post('http://localhost:8000/api/doctors/', form.value)
+      await axios.post('doctors/', form.value)
     }
     show(id ? 'Médico atualizado com sucesso.' : 'Médico cadastrado com sucesso.')
     router.push('/doctors')
