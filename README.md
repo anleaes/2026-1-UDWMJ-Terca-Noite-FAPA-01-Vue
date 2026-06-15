@@ -1,4 +1,4 @@
-# ClinicApp — Sistema de Gestão de Clínica Médica
+# ClinicaApp — Sistema de Gestão de Clínica Médica
 
 Sistema web para gerenciamento de clínica médica, desenvolvido com Django no back-end e Vue.js no front-end.
 
