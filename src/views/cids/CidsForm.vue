@@ -49,7 +49,7 @@ async function save() {
     <form @submit.prevent="save">
       <div class="form-grid">
         <div class="form-group full">
-          <label>Nome</label>
+          <label>Código</label>
           <input type="text" v-model="form.name" required />
         </div>
         <div class="form-group full">
